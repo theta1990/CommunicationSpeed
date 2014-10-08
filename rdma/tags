@@ -1,0 +1,53 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+MAX_POLL_CQ_TIMEOUT	rc_example.c	19;"	d	file:
+MSG	rc_example.c	20;"	d	file:
+MSG_SIZE	rc_example.c	23;"	d	file:
+RDMAMSGR	rc_example.c	21;"	d	file:
+RDMAMSGW	rc_example.c	22;"	d	file:
+addr	rc_example.c	/^	uint64_t	addr;$/;"	m	struct:cm_con_data_t	file:
+buf	rc_example.c	/^	char			*buf;$/;"	m	struct:resources	file:
+cm_con_data_t	rc_example.c	/^struct cm_con_data_t{$/;"	s	file:
+config	rc_example.c	/^struct config_t config = {$/;"	v	typeref:struct:config_t
+config_t	rc_example.c	/^struct config_t{$/;"	s	file:
+connect_qp	rc_example.c	/^static int connect_qp(struct resources *res){$/;"	f	file:
+cq	rc_example.c	/^	struct ibv_cq		*cq;$/;"	m	struct:resources	typeref:struct:resources::ibv_cq	file:
+dev_name	rc_example.c	/^	const char	*dev_name;$/;"	m	struct:config_t	file:
+device_attr	rc_example.c	/^	struct ibv_device_attr	device_attr;$/;"	m	struct:resources	typeref:struct:resources::ibv_device_attr	file:
+gid	rc_example.c	/^	uint8_t		gid[16];$/;"	m	struct:cm_con_data_t	file:
+gid_idx	rc_example.c	/^	int		gid_idx;$/;"	m	struct:config_t	file:
+htonll	rc_example.c	/^static inline uint64_t htonll(uint64_t x) {return bswap_64(x);}$/;"	f	file:
+htonll	rc_example.c	/^static inline uint64_t htonll(uint64_t x) {return x;}$/;"	f	file:
+ib_ctx	rc_example.c	/^	struct ibv_context	*ib_ctx;$/;"	m	struct:resources	typeref:struct:resources::ibv_context	file:
+ib_port	rc_example.c	/^	int		ib_port;$/;"	m	struct:config_t	file:
+lid	rc_example.c	/^	uint16_t	lid;$/;"	m	struct:cm_con_data_t	file:
+main	hello.c	/^int main(){$/;"	f
+main	ib_test.c	/^int main(){$/;"	f
+main	rc_example.c	/^int main(int argc, char **argv){$/;"	f
+modify_qp_rtr	rc_example.c	/^static int modify_qp_rtr(struct ibv_qp *qp, uint32_t remote_qpn, uint16_t dlid, uint8_t *dgid){$/;"	f	file:
+modify_qp_rts	rc_example.c	/^static int modify_qp_rts(struct ibv_qp *qp){$/;"	f	file:
+modify_qp_to_init	rc_example.c	/^static int modify_qp_to_init(struct ibv_qp *qp){$/;"	f	file:
+mr	rc_example.c	/^	struct ibv_mr		*mr;$/;"	m	struct:resources	typeref:struct:resources::ibv_mr	file:
+ntohll	rc_example.c	/^static inline uint64_t ntohll(uint64_t x) {return bswap_64(x);}$/;"	f	file:
+ntohll	rc_example.c	/^static inline uint64_t ntohll(uint64_t x) {return x;}$/;"	f	file:
+pd	rc_example.c	/^	struct ibv_pd		*pd;$/;"	m	struct:resources	typeref:struct:resources::ibv_pd	file:
+poll_completion	rc_example.c	/^static int poll_completion(struct resources *res){$/;"	f	file:
+port_attr	rc_example.c	/^	struct ibv_port_attr	port_attr;$/;"	m	struct:resources	typeref:struct:resources::ibv_port_attr	file:
+post_recv	rc_example.c	/^static int post_recv(struct resources *res){$/;"	f	file:
+post_send	rc_example.c	/^static int post_send(struct resources *res, int opcode){$/;"	f	file:
+qp	rc_example.c	/^	struct ibv_qp		*qp;$/;"	m	struct:resources	typeref:struct:resources::ibv_qp	file:
+qp_num	rc_example.c	/^	uint32_t	qp_num;$/;"	m	struct:cm_con_data_t	file:
+remote_props	rc_example.c	/^	struct cm_con_data_t	remote_props;$/;"	m	struct:resources	typeref:struct:resources::cm_con_data_t	file:
+resources	rc_example.c	/^struct resources{$/;"	s	file:
+resources_create	rc_example.c	/^static int resources_create(struct resources *res){$/;"	f	file:
+resources_init	rc_example.c	/^static void resources_init(struct resources *res){$/;"	f	file:
+rkey	rc_example.c	/^	uint32_t	rkey;	\/*Remote key*\/$/;"	m	struct:cm_con_data_t	file:
+server_name	rc_example.c	/^	char		*server_name;$/;"	m	struct:config_t	file:
+sock	rc_example.c	/^	int 			sock;$/;"	m	struct:resources	file:
+sock_connect	rc_example.c	/^static int sock_connect(const char *servername, int port){$/;"	f	file:
+sock_sync_data	rc_example.c	/^int sock_sync_data(int sock , int xfer_size, char *local_data, char *remote_data){$/;"	f
+tcp_port	rc_example.c	/^	u_int32_t	tcp_port;$/;"	m	struct:config_t	file:
