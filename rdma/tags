@@ -25,9 +25,7 @@ htonll	rc_example.c	/^static inline uint64_t htonll(uint64_t x) {return x;}$/;"	
 ib_ctx	rc_example.c	/^	struct ibv_context	*ib_ctx;$/;"	m	struct:resources	typeref:struct:resources::ibv_context	file:
 ib_port	rc_example.c	/^	int		ib_port;$/;"	m	struct:config_t	file:
 lid	rc_example.c	/^	uint16_t	lid;$/;"	m	struct:cm_con_data_t	file:
-main	hello.c	/^int main(){$/;"	f
-main	ib_test.c	/^int main(){$/;"	f
-main	rc_example.c	/^int main(int argc, char **argv){$/;"	f
+main	rc_example.c	/^int main(int argc, char *argv[]){$/;"	f
 modify_qp_rtr	rc_example.c	/^static int modify_qp_rtr(struct ibv_qp *qp, uint32_t remote_qpn, uint16_t dlid, uint8_t *dgid){$/;"	f	file:
 modify_qp_rts	rc_example.c	/^static int modify_qp_rts(struct ibv_qp *qp){$/;"	f	file:
 modify_qp_to_init	rc_example.c	/^static int modify_qp_to_init(struct ibv_qp *qp){$/;"	f	file:
@@ -39,11 +37,13 @@ poll_completion	rc_example.c	/^static int poll_completion(struct resources *res)
 port_attr	rc_example.c	/^	struct ibv_port_attr	port_attr;$/;"	m	struct:resources	typeref:struct:resources::ibv_port_attr	file:
 post_recv	rc_example.c	/^static int post_recv(struct resources *res){$/;"	f	file:
 post_send	rc_example.c	/^static int post_send(struct resources *res, int opcode){$/;"	f	file:
+print_config	rc_example.c	/^static void print_config(){$/;"	f	file:
 qp	rc_example.c	/^	struct ibv_qp		*qp;$/;"	m	struct:resources	typeref:struct:resources::ibv_qp	file:
 qp_num	rc_example.c	/^	uint32_t	qp_num;$/;"	m	struct:cm_con_data_t	file:
 remote_props	rc_example.c	/^	struct cm_con_data_t	remote_props;$/;"	m	struct:resources	typeref:struct:resources::cm_con_data_t	file:
 resources	rc_example.c	/^struct resources{$/;"	s	file:
 resources_create	rc_example.c	/^static int resources_create(struct resources *res){$/;"	f	file:
+resources_destroy	rc_example.c	/^static int resources_destroy(struct resources *res){$/;"	f	file:
 resources_init	rc_example.c	/^static void resources_init(struct resources *res){$/;"	f	file:
 rkey	rc_example.c	/^	uint32_t	rkey;	\/*Remote key*\/$/;"	m	struct:cm_con_data_t	file:
 server_name	rc_example.c	/^	char		*server_name;$/;"	m	struct:config_t	file:

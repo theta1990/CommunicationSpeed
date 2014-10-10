@@ -15,7 +15,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <iostream>
-
+#include <getopt.h>
 #include "../clc/MyClock.h"
 
 #define MAXCONN 5
@@ -132,10 +132,14 @@ int clientThread(char *host) {
 
 int main(int argc, char **argv){
 
-	if( strcmp(argv[1], "S") == 0 ){
-		serverThread();
+	int c;
+	c = getopt(argc, argv, "s:");
+	
+	if ( c != -1 ){
+		clientThread(optarg);
 	}else {
-		clientThread(argv[1]);
+		serverThread();
 	}
+		
 	return 0;
 }
