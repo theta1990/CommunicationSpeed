@@ -716,7 +716,7 @@ static void print_config(){
 	fprintf(stdout, "------------------------------\n\n");
 }
 
-int main(int argc, char *argv[]){
+int rcmain(int argc, char *argv[]){
 
 	struct resources	res;
 	int			rc = 1;

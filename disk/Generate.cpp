@@ -47,7 +47,7 @@ const int Generate::getSize() {
 }
 
 } /* namespace expdb */
-int main(int argc, char **argv) {
+int diskmain(int argc, char **argv) {
 
 	int fileSize = 20;
 	int bufferSize;
