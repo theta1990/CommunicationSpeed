@@ -11,38 +11,60 @@
 #include "../atomic.h"
 #include "../test.h"
 #include "../clock.h"
+#include "../murmur_hash.h"
+const int Prime = 1024*1024*1024 + 1;
+
+void permuate1(uint32_t *array, uint32_t size) {
+	uint32_t i;
+	for (i = 0; i < size; ++i) {
+		array[i] = (rand()) % size;
+	}
+}
 
 /**
  * memory access thread
  */
 void *memthread(void *arg) {
 
-	int node = *static_cast<int*>(arg);
-	uint8_t *ptr, *remotePtr;
+	uint32_t *ptr, *remotePtr;
 	uint64_t begin, end;
-	if (numa_run_on_node(node) < 0) {
+	uint64_t aggre = 0;
+//	const int32_t size = 1024 * 1024 * 128;
+	const int32_t size = Prime;
+	const int32_t iter = size / 1024;
+	uint32_t i, j;
+	if (numa_run_on_node(0) < 0) {
 		VOLT_WARN("bind failure");
 	} else {
 
-		ptr = (uint8_t *) numa_alloc_onnode(sizeof(uint8_t), node);
+		ptr = (uint32_t *) numa_alloc_onnode(sizeof(uint32_t) * Prime, 0);
 
+		permuate1(ptr, size);
+
+		aggre = 0;
 		begin = common::getCycleCount();
-		for (int i = 0; i < 1000; ++i) {
-			(*ptr)++;
+		j = 0;
+		for (i = 0; i < iter; ++i) {
+			j = ptr[j];
 		}
 		end = common::getCycleCount();
-		VOLT_INFO("local access cost: %ld", end - begin);
+		VOLT_INFO("local access cost: \t%ld", (end - begin) / iter, j);
 
-		remotePtr = (uint8_t *) numa_alloc_onnode(sizeof(uint8_t),
-				(node + 1) % 2);
-		*remotePtr = 0;
+		remotePtr = (uint32_t *) numa_alloc_onnode(sizeof(uint32_t) * Prime, 1);
+
+//		permuate1(remotePtr, size);
+		memcpy(remotePtr, ptr, size * sizeof(uint32_t));
+
+		aggre = 0;
 		begin = common::getCycleCount();
-		for (int i = 0; i < 1000; ++i) {
-			(*remotePtr)++;
+		j = 0;
+		for (i = 0; i < iter; ++i) {
+			j = remotePtr[j];
 		}
+
 		end = common::getCycleCount();
 
-		VOLT_INFO("remote access, cost: %ld", end - begin);
+		VOLT_INFO("remote access, cost: %ld", (end - begin) / iter, j);
 	}
 	return NULL;
 }
@@ -52,32 +74,53 @@ void *memthread(void *arg) {
  */
 void *casthread(void *arg) {
 
-	int node = *static_cast<int*>(arg);
-	uint8_t *ptr, *remotePtr;
+	uint32_t *ptr, *remotePtr;
 	uint64_t begin, end;
-	if (numa_run_on_node(node) < 0) {
+	uint64_t aggre = 0;
+//	const int32_t size = 1024 * 1024 * 128;
+	const int32_t size = Prime;
+	const int32_t iter = size / 1024;
+	uint32_t i, j;
+	if (numa_run_on_node(0) < 0) {
 		VOLT_WARN("bind failure");
 	} else {
 
-		ptr = (uint8_t *) numa_alloc_onnode(sizeof(uint8_t), node);
+		ptr = (uint32_t *) numa_alloc_onnode(sizeof(uint32_t) * Prime, 0);
 
+		permuate1(ptr, size);
+
+		aggre = 0;
 		begin = common::getCycleCount();
-		for (int i = 0; i < 1000; ++i) {
-			atomic::atomic_inc(ptr);
+		volatile int length=16;
+		for (i = 0; i < iter; i+=length) {
+//			j = ptr[i];
+//			aggre += ptr[j];
+			atomic::atomic_inc(&ptr[i%(2048*1024*1024)]);
+//			ptr[j] --;
+
+//			atomic::atomic_dec(&ptr[j]);
 		}
 		end = common::getCycleCount();
-		VOLT_INFO("local access cost: %ld", end - begin);
+		VOLT_INFO("local access cost: \t%ld", (end - begin) / iter);
 
-		remotePtr = (uint8_t *) numa_alloc_onnode(sizeof(uint8_t),
-				(node + 1) % 2);
-		*remotePtr = 0;
+		remotePtr = (uint32_t *) numa_alloc_onnode(sizeof(uint32_t) * Prime, 1);
+
+//		permuate1(remotePtr, size);
+		memcpy(remotePtr, ptr, size * sizeof(uint32_t));
+
+		aggre = 0;
 		begin = common::getCycleCount();
-		for (int i = 0; i < 1000; ++i) {
-			atomic::atomic_inc(remotePtr);
+
+		for (i = 0; i < iter; i+=length) {
+//			j = remotePtr[i];
+			atomic::atomic_inc(&ptr[i%(2048*1024*1024)]);
+//			ptr[j] --;
+//			atomic::atomic_dec(&ptr[j]);
 		}
+
 		end = common::getCycleCount();
 
-		VOLT_INFO("remote access, cost: %ld", end - begin);
+		VOLT_INFO("remote access, cost: %ld", (end - begin)/iter);
 	}
 	return NULL;
 }
@@ -138,19 +181,21 @@ int numatest(int argc, char **argv) {
 
 		printf("----------direct memory access----------\r\n");
 		memthread(&node);
+//
+		printf("----------cas memory access----------\r\n");
+//		casthread(&node);
 
-		printf("----------remote memory access----------\r\n");
-		casthread(&node);
+//		printf("----------barrier memeory access--------\r\n");
 
-		printf("----------barrier memeory access--------\r\n");
-
-		pthread_t pid1, pid2;
-		pthread_create(&pid1, NULL, barrierThread1, NULL);
-		pthread_create(&pid2, NULL, barrierThread2, NULL);
-
-
-		pthread_join(pid1, NULL);
-		pthread_join(pid2, NULL);
+//		mem1 = (int*) malloc(sizeof(int));
+//		mem2 = (int*) malloc(sizeof(int));
+//
+//		pthread_t pid1, pid2;
+//		pthread_create(&pid1, NULL, barrierThread1, NULL);
+//		pthread_create(&pid2, NULL, barrierThread2, NULL);
+//
+//		pthread_join(pid1, NULL);
+//		pthread_join(pid2, NULL);
 	}
 
 	return 0;
