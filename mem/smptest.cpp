@@ -51,7 +51,7 @@ void *testPermutate(){
 
 	std::set<uint32_t> set;
 	set.clear();
-	for(int32_t i = 0;i<range ; i+= CacheLineSize/sizeof(uint32_t)){
+	for (int32_t i = 0; i < range; i += CacheLineSize / sizeof(uint32_t)) {
 		set.insert(j);
 		j = array[j];
 	}
@@ -68,4 +68,4 @@ int smptest(int argc, char **argv){
 	testPermutate();
 	return 0;
 }
-TEST(smptest);
+//TEST(smptest);
