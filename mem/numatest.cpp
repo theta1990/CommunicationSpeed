@@ -200,5 +200,5 @@ int numatest(int argc, char **argv) {
 
 	return 0;
 }
-TEST(numatest);
+//TEST(numatest);
 
