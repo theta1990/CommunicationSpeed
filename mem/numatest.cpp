@@ -26,22 +26,22 @@ void permuate1(uint32_t *array, uint32_t size) {
 	}
 }
 
-inline int32_t setAffinity() {
+inline int32_t setAffinity(int32_t id) {
 
 	cpu_set_t set;
 	CPU_ZERO(&set);
-	CPU_SET(0, &set);
+	CPU_SET(id, &set);
 	return sched_setaffinity(getpid(), 1, &set);
 }
 
-//void outputDetailStatistic(SystemCounterState before_sstate,
-//		SystemCounterState after_sstate) {
-//
-//	std::cout << "L2 cache hit ratio:"
-//			<< getL2CacheHits(before_sstate, after_sstate)
-//			<< "L3 cache hit ratio:"
-//			<< getL3CacheHitRatio(before_sstate, after_sstate)<<std::endl;
-//}
+inline void outputDetailStatistic(CoreCounterState before_sstate,
+		CoreCounterState after_sstate) {
+
+	std::cout << "L2 cache hit ratio:"
+			<< getL2CacheHitRatio(before_sstate, after_sstate)<<std::endl
+			<< "L3 cache hit ratio:"
+			<< getL3CacheHitRatio(before_sstate, after_sstate)<<std::endl;
+}
 
 void testCache() {
 
@@ -61,19 +61,23 @@ void *memthread(void *arg) {
 	const uint32_t iter = ITERCASE;
 	uint32_t i, j;
 	uint32_t range;
+
+	int coreId = 0;
+
 //	if (numa_run_on_node(0) < 0) {
 
 	PCM * m = PCM::getInstance();
-	SystemCounterState before_sstate;
-	SystemCounterState after_sstate;
+	CoreCounterState before_sstate;
+	CoreCounterState after_sstate;
 //	 program counters, and on a failure just exit
 
-//	if (m->program() != PCM::Success) {
-//		VOLT_WARN("pcm open failed");
-////		return NULL;
-//	}
+	m->cleanup();
+	if (m->program() != PCM::Success) {
+		VOLT_WARN("pcm open failed");
+//		return NULL;
+	}
 
-	if (setAffinity() < 0) {
+	if (setAffinity(coreId) < 0) {
 		VOLT_WARN("bind failure");
 	} else {
 
@@ -85,54 +89,60 @@ void *memthread(void *arg) {
 //		aggre = 0;
 		j = 0;
 		warmUpL1(ptr, size);
-//		before_sstate = getSystemCounterState();
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-//		after_sstate = getSystemCounterState();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("local L1 access cost: \t%ld", (end - begin) / iter, j);
-//		outputDetailStatistic(before_sstate, after_sstate);
+		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l1ml2h(ptr, size);
 		j = 0;
 		warmUpL2(ptr, size);
-//		before_sstate = getSystemCounterState();
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-//		after_sstate = getSystemCounterState();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("local L2 access cost: \t%ld", (end - begin) / iter, j);
-//		outputDetailStatistic(before_sstate, after_sstate);
+		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l2ml3h(ptr, size);
 		j = 0;
 		warmUpL3(ptr, size);
-//		before_sstate = getSystemCounterState();
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-//		after_sstate = getSystemCounterState();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("local L3 access cost: \t%ld", (end - begin) / iter, j);
-//		outputDetailStatistic(before_sstate, after_sstate);
+		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l3m(ptr, size);
 		j = 0;
 		warmUpL4(ptr, size);
-//		before_sstate = getSystemCounterState();
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-//		after_sstate = getSystemCounterState();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("local me access cost: \t%ld", (end - begin) / iter, j);
-//		outputDetailStatistic(before_sstate, after_sstate);
+		outputDetailStatistic(before_sstate, after_sstate);//		numaNodes = numa_max_node();
+		//		VOLT_INFO("numa node info");
+		//		for (int i = 0; i <= numaNodes; ++i) {
+		//
+		//			size = numa_node_size(i, &freep);
+		//			VOLT_INFO("node: %d, size: %ld\n", i, size);
+		//		}
 
 		numa_free(ptr, size);
 		ptr = NULL;
@@ -143,42 +153,55 @@ void *memthread(void *arg) {
 		range = l1h(ptr, size);
 		j = 0;
 		warmUpL1(ptr, size);
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("remote L1 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(before_sstate, after_sstate);
+
 
 		range = l1ml2h(ptr, size);
 		j = 0;
 		warmUpL2(ptr, size);
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("remote L2 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l2ml3h(ptr, size);
 		j = 0;
 		warmUpL3(ptr, size);
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("remote L3 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l3m(ptr, size);
 		j = 0;
 		warmUpL4(ptr, size);
+		before_sstate = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		after_sstate = getCoreCounterState(coreId);
 		VOLT_INFO("remote me access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(before_sstate, after_sstate);
 
 		numa_free(ptr, size);
 
@@ -191,7 +214,7 @@ void *memthread(void *arg) {
  */
 void *casthread(void *arg) {
 
-	uint32_t *ptr, *remotePtr;
+	uint32_t *ptr;
 	uint64_t begin, end;
 //	uint64_t aggre = 0;
 //	const int32_t size = 1024 * 1024 * 128;
@@ -200,8 +223,20 @@ void *casthread(void *arg) {
 	const uint32_t iter = ITERCASE;
 	uint32_t i, j;
 	uint32_t range;
-//	if (numa_run_on_node(0) < 0) {
-	if (setAffinity() < 0) {
+	int coreId = 0;
+
+
+	CoreCounterState beginState;
+	CoreCounterState endState;
+
+	PCM *m = PCM::getInstance();
+
+	m->cleanup();
+	if( m->program() != PCM::Success ) {
+		VOLT_WARN("PCM inits not properly");
+	}
+
+	if (setAffinity(coreId) < 0) {
 		VOLT_WARN("bind failure");
 	} else {
 
@@ -213,6 +248,7 @@ void *casthread(void *arg) {
 //		aggre = 0;
 		j = 0;
 		warmUpL1(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			atomic::atomic_inc(&ptr[j]);
@@ -220,11 +256,14 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("local L1 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		range = l1ml2h(ptr, size);
 		j = 0;
 		warmUpL2(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			atomic::atomic_inc(&ptr[j]);
@@ -232,11 +271,14 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("local L2 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		range = l2ml3h(ptr, size);
 		j = 0;
 		warmUpL3(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 
 		for (i = 0; i < iter; ++i) {
@@ -245,11 +287,14 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("local L3 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		range = l3m(ptr, size);
 		j = 0;
 		warmUpL4(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 
 		for (i = 0; i < iter; ++i) {
@@ -258,7 +303,9 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("local me access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		numa_free(ptr, size);
 		ptr = NULL;
@@ -271,6 +318,7 @@ void *casthread(void *arg) {
 //		aggre = 0;
 		j = 0;
 		warmUpL1(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 
 		for (i = 0; i < iter; ++i) {
@@ -279,11 +327,14 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("remote L1 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		range = l1ml2h(ptr, size);
 		j = 0;
 		warmUpL2(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			atomic::atomic_inc(&ptr[j]);
@@ -291,11 +342,14 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("remote L2 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		range = l2ml3h(ptr, size);
 		j = 0;
 		warmUpL3(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			atomic::atomic_inc(&ptr[j]);
@@ -303,19 +357,30 @@ void *casthread(void *arg) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("remote L3 access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		range = l3m(ptr, size);
 		j = 0;
 		warmUpL4(ptr, size);
+		beginState = getCoreCounterState(coreId);
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			atomic::atomic_inc(&ptr[j]);
-			--ptr[j];
+			--ptr[j];//		numaNodes = numa_max_node();
+			//		VOLT_INFO("numa node info");
+			//		for (int i = 0; i <= numaNodes; ++i) {
+			//
+			//			size = numa_node_size(i, &freep);
+			//			VOLT_INFO("node: %d, size: %ld\n", i, size);
+			//		}
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
+		endState = getCoreCounterState(coreId);
 		VOLT_INFO("remote me access cost: \t%ld", (end - begin) / iter, j);
+		outputDetailStatistic(beginState, endState);
 
 		numa_free(ptr, size);
 
@@ -381,13 +446,6 @@ int numatest(int argc, char **argv) {
 		VOLT_WARN("numa lib initilization failed");
 	} else {
 
-//		numaNodes = numa_max_node();
-//		VOLT_INFO("numa node info");
-//		for (int i = 0; i <= numaNodes; ++i) {
-//
-//			size = numa_node_size(i, &freep);
-//			VOLT_INFO("node: %d, size: %ld\n", i, size);
-//		}
 		int node = 0;
 
 		printf("----------direct memory access----------\r\n");
@@ -411,5 +469,5 @@ int numatest(int argc, char **argv) {
 
 	return 0;
 }
-//TEST(numatest);
+TEST(numatest);
 

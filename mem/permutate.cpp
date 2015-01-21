@@ -6,7 +6,7 @@ const int32_t CacheLineSize = 64;
 const int32_t L1CacheSize = 16 * 1024;
 const int32_t L2CacheSize = 128 * 1024;
 const int32_t L3CacheSize = 3 * 1024 * 1024;
-#define WARMUPROUND 10
+#define WARMUPROUND 100
 /**
  * pattern:
  * 0 1 2 ... 63 | 64 65 ... 127 |

@@ -35,7 +35,7 @@ inline int32_t setAffinity() {
 	return sched_setaffinity(getpid(), 1, &set);
 }
 
-void outputDetailStatistic(CoreState before_sstate, CoreState after_sstate) {
+inline void outputDetailStatistic(CoreState before_sstate, CoreState after_sstate) {
 
 //	std::cout << "L2 cache hit ratio:"
 //			<< getL2CacheHitRatio(before_sstate, after_sstate) << std::endl
@@ -294,5 +294,5 @@ int smptest(int argc, char **argv) {
 
 	return 0;
 }
-TEST(smptest);
+//TEST(smptest);
 
