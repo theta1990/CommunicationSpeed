@@ -34,14 +34,14 @@ inline int32_t setAffinity() {
 	return sched_setaffinity(getpid(), 1, &set);
 }
 
-void outputDetailStatistic(SystemCounterState before_sstate,
-		SystemCounterState after_sstate) {
-
-	std::cout << "L2 cache hit ratio:"
-			<< getL2CacheHits(before_sstate, after_sstate)
-			<< "L3 cache hit ratio:"
-			<< getL3CacheHitRatio(before_sstate, after_sstate)<<std::endl;
-}
+//void outputDetailStatistic(SystemCounterState before_sstate,
+//		SystemCounterState after_sstate) {
+//
+//	std::cout << "L2 cache hit ratio:"
+//			<< getL2CacheHits(before_sstate, after_sstate)
+//			<< "L3 cache hit ratio:"
+//			<< getL3CacheHitRatio(before_sstate, after_sstate)<<std::endl;
+//}
 
 void testCache() {
 
@@ -66,12 +66,12 @@ void *memthread(void *arg) {
 	PCM * m = PCM::getInstance();
 	SystemCounterState before_sstate;
 	SystemCounterState after_sstate;
-	// program counters, and on a failure just exit
+//	 program counters, and on a failure just exit
 
-	if (m->program() != PCM::Success) {
-		VOLT_WARN("pcm open failed");
-//		return NULL;
-	}
+//	if (m->program() != PCM::Success) {
+//		VOLT_WARN("pcm open failed");
+////		return NULL;
+//	}
 
 	if (setAffinity() < 0) {
 		VOLT_WARN("bind failure");
@@ -85,54 +85,54 @@ void *memthread(void *arg) {
 //		aggre = 0;
 		j = 0;
 		warmUpL1(ptr, size);
-		before_sstate = getSystemCounterState();
+//		before_sstate = getSystemCounterState();
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-		after_sstate = getSystemCounterState();
+//		after_sstate = getSystemCounterState();
 		VOLT_INFO("local L1 access cost: \t%ld", (end - begin) / iter, j);
-		outputDetailStatistic(before_sstate, after_sstate);
+//		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l1ml2h(ptr, size);
 		j = 0;
 		warmUpL2(ptr, size);
-		before_sstate = getSystemCounterState();
+//		before_sstate = getSystemCounterState();
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-		after_sstate = getSystemCounterState();
+//		after_sstate = getSystemCounterState();
 		VOLT_INFO("local L2 access cost: \t%ld", (end - begin) / iter, j);
-		outputDetailStatistic(before_sstate, after_sstate);
+//		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l2ml3h(ptr, size);
 		j = 0;
 		warmUpL3(ptr, size);
-		before_sstate = getSystemCounterState();
+//		before_sstate = getSystemCounterState();
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-		after_sstate = getSystemCounterState();
+//		after_sstate = getSystemCounterState();
 		VOLT_INFO("local L3 access cost: \t%ld", (end - begin) / iter, j);
-		outputDetailStatistic(before_sstate, after_sstate);
+//		outputDetailStatistic(before_sstate, after_sstate);
 
 		range = l3m(ptr, size);
 		j = 0;
 		warmUpL4(ptr, size);
-		before_sstate = getSystemCounterState();
+//		before_sstate = getSystemCounterState();
 		begin = common::getCycleCount();
 		for (i = 0; i < iter; ++i) {
 			j = ptr[j];
 		}
 		end = common::getCycleCount();
-		after_sstate = getSystemCounterState();
+//		after_sstate = getSystemCounterState();
 		VOLT_INFO("local me access cost: \t%ld", (end - begin) / iter, j);
-		outputDetailStatistic(before_sstate, after_sstate);
+//		outputDetailStatistic(before_sstate, after_sstate);
 
 		numa_free(ptr, size);
 		ptr = NULL;
@@ -411,5 +411,5 @@ int numatest(int argc, char **argv) {
 
 	return 0;
 }
-TEST(numatest);
+//TEST(numatest);
 
